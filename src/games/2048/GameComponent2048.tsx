@@ -9,6 +9,7 @@ import { Direction } from "./types";
 // todo: Best score
 // todo: Proper action separation (move, merge, create) and async actions queue
 
+
 const actionsMap = {
   ArrowUp: Direction.UP,
   ArrowDown: Direction.DOWN,
