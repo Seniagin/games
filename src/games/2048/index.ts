@@ -1,0 +1,1 @@
+export { default as Game2048 } from './GameComponent2048';
