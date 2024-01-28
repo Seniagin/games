@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useCallback, useEffect, useState } from "react";
-import { createNewTile, gameTilesMoveActionHandler, generateTiles, resetGame } from "./engine";
+import { createNewTile, gameTilesMoveActionHandler, generateTiles, isGameOver, resetGame } from "./engine";
 import { Direction, Tile } from "./types";
+import { addActionToGameThread, initGameThread } from "./thread";
 
 type TilesContextType = {
   tiles: Tile[],
@@ -17,23 +18,38 @@ export const TilesContext = createContext<TilesContextType>({
 });
 
 
-export const TilesContextProvider = ({ children, setResetCallback }: { children: ReactNode, setResetCallback: (callbackFn: () => void) => void }) => {
+export const TilesContextProvider = (
+  { children, setResetCallback, setIsGameOver, setScore }: {
+    children: ReactNode,
+    setResetCallback: (callbackFn: () => void) => void,
+    setIsGameOver: (isOver: boolean) => void,
+    setScore: (score: number) => void,
+  }
+) => {
   const [tiles, setTiles] = useState<Tile[]>([]);
 
   useEffect(() => {
-    console.log('-')
-    setResetCallback(() => () => {
-      console.log('reset')
-      resetGame(setTiles);
-    })
-  }, [setTiles, setResetCallback])
+    if (isGameOver(tiles)) {
+      setIsGameOver(true);
+    }
+  }, [tiles, setIsGameOver])
+
 
   const createInitialTiles = useCallback(() => {
-    if (tiles.length > 1) return;
     const createdTiles = generateTiles(2)
 
+    initGameThread(createdTiles)
     setTiles(createdTiles);
-  }, [tiles, setTiles])
+  }, [setTiles]);
+
+  useEffect(() => {
+    setResetCallback(() => () => {
+      resetGame(setTiles);
+      createInitialTiles();
+      setIsGameOver(false);
+    })
+  }, [setTiles, setResetCallback, setIsGameOver, createInitialTiles])
+
 
   const createTile = useCallback(() => {
     const tile = createNewTile(tiles);
@@ -41,8 +57,10 @@ export const TilesContextProvider = ({ children, setResetCallback }: { children:
   }, [tiles, setTiles]);
 
   const handleAction = useCallback((direction: Direction) => {
-    gameTilesMoveActionHandler(direction, tiles, setTiles);
-  }, [tiles, setTiles]);
+    addActionToGameThread(
+      gameTilesMoveActionHandler(direction, setTiles, setScore)
+    )
+  }, [setTiles, setScore]);
 
 
   useEffect(() => {

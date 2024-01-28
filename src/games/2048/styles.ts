@@ -1,26 +1,39 @@
 import styled, { keyframes, css } from "styled-components";
+import { MOVE_ANIMATION_DURATION_MS } from "./constants";
 
 function getAbsolutePosition(position: string) {
-  const [col, row] = position.split("-");
-  const x = (parseInt(col) - 1) * 100 + 55;
-  const y = (parseInt(row) - 1) * 100 + 55;
-  return { x, y };
+    const [col, row] = position.split("-");
+    const x = (parseInt(col) - 1) * 100 + 55;
+    const y = (parseInt(row) - 1) * 100 + 55;
+    return { x, y };
 }
 
+const mergeAnimationTime = 0.1;
+const expandAnimationTime = 0.15;
+
 const ValueColor: Record<number, string> = {
-  0: "#cdc1b4",
-  2: "#eee4da",
-  4: "#ede0c8",
-  8: "#f2b179",
-  16: "#f59563",
-  32: "#f67c5f",
-  64: "#f65e3b",
-  128: "#edcf72",
-  256: "#edcc61",
-  512: "#edc850",
-  1024: "#edc53f",
-  2048: "#edc22e",
+    0: "#cdc1b4",
+    2: "#eee4da",
+    4: "#ede0c8",
+    8: "#f2b179",
+    16: "#f59563",
+    32: "#f67c5f",
+    64: "#f65e3b",
+    128: "#edcf72",
+    256: "#edcc61",
+    512: "#edc850",
+    1024: "#edc53f",
+    2048: "#edc22e",
 };
+
+const fadeInAnimation = keyframes`
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0.7;
+    }
+`;
 
 const expandAnimation = keyframes`
     0% {
@@ -75,15 +88,15 @@ export const StyledCellItem = styled.div<{ value: number, position: string, valu
     z-index: ${({ removed }) => (removed ? 1 : 2)};
     top: ${({ position }) => getAbsolutePosition(position).y}px;
     left: ${({ position }) => getAbsolutePosition(position).x}px;
-    transition: all 0.2s ease-in-out;
+    transition: all ${MOVE_ANIMATION_DURATION_MS}ms ease-in-out;
     ${({ valueChanged }) =>
-    valueChanged
-      ? css`
-          animation: ${css`${mergeAnimation} 0.1s ease-in-out`},
-            ${css`${expandAnimation} 0.15s ease-out`};
+        valueChanged
+            ? css`
+          animation: ${css`${mergeAnimation} ${mergeAnimationTime}s ease-in-out`},
+            ${css`${expandAnimation} ${expandAnimationTime}s ease-out`};
         `
-      : css`
-          animation: ${css`${expandAnimation} 0.15s ease-out`};
+            : css`
+          animation: ${css`${expandAnimation} ${expandAnimationTime}s ease-out`};
         `}`;
 
 export const StyledGameField = styled.div`
@@ -128,4 +141,25 @@ export const StyledResetGameButton = styled.button`
     &:hover {
         background-color: #9c8a7d;
     }
+`;
+
+
+export const StyledGameOverOverlay = styled.div`
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #eee4da;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    font-size: 2em;
+    font-weight: bold;
+    color: #776e65;
+    text-align: center;
+    z-index: 3;
+    opacity: 0.7;
+    animation: ${fadeInAnimation} 0.5s linear;
 `;

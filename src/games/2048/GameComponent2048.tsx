@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { StyledCellItem, StyledGameField, StyledGameFieldCell, StyledPageContainer, StyledResetGameButton } from "./styles";
+import { StyledCellItem, StyledGameField, StyledGameFieldCell, StyledGameOverOverlay, StyledPageContainer, StyledResetGameButton } from "./styles";
 import { TilesContext, TilesContextProvider } from "./utils";
 import { Direction } from "./types";
 
@@ -48,14 +48,23 @@ function TilesComponent() {
 
 export default function GameComponent2048() {
   const [resetCallback, setResetCallback] = useState<(() => void) | null>(null)
+  const [isGameOver, setIsGameOver] = useState(false)
+  const [score, setScore] = useState(0);
+
+  function scoreUpdateCallback(mergedSum: number) {
+    setScore(score + mergedSum);
+  }
 
   return (
     <StyledPageContainer>
+      <h1>2048</h1>
+      <span>Score: {score}</span>
       <StyledGameField>
+        {isGameOver && <StyledGameOverOverlay>Game Over</StyledGameOverOverlay>}
         {Array.from({ length: 16 }).map((_, i) => (
           <StyledGameFieldCell key={i} />
         ))}
-        <TilesContextProvider setResetCallback={setResetCallback}>
+        <TilesContextProvider setResetCallback={setResetCallback} setIsGameOver={setIsGameOver} setScore={scoreUpdateCallback}>
           <TilesComponent />
         </TilesContextProvider>
       </StyledGameField>
